@@ -10,18 +10,31 @@ import { Slots } from "./SlotManipulate.sol";
 // 改寫 upgradeTo 和 upgradeToAndCall 的邏輯
 // 同樣使用 Clock 和 ClockV2 來測試 Upgrade 是否成功
 contract BasicProxy is Proxy, Slots {
+  bytes32 constant IMPLEMENTATION_SLOT = bytes32(uint256(keccak256('eip1967.proxy.implementation')) - 1);
 
   constructor(address _implementation) {
+    _setSlotToAddress(IMPLEMENTATION_SLOT, _implementation);
   }
 
   fallback() external payable virtual {
+    _delegate(_getSlotToAddress(IMPLEMENTATION_SLOT));
   }
 
   receive() external payable {}
 
-  function upgradeTo(address _newImpl) public virtual {
+  modifier checkImpAddress(address _addr) {
+    require(_addr != address(0), "Cannot set implementation to address(0)");
+    require(_addr != _getSlotToAddress(IMPLEMENTATION_SLOT), "Cannot set implementation to the same address");
+    _;
   }
 
-  function upgradeToAndCall(address _newImpl, bytes memory data) public virtual {
+  function upgradeTo(address _newImpl) public virtual checkImpAddress(_newImpl) {
+    _setSlotToAddress(IMPLEMENTATION_SLOT, _newImpl);
+  }
+
+  function upgradeToAndCall(address _newImpl, bytes memory data) public virtual checkImpAddress(_newImpl) {
+    _setSlotToAddress(IMPLEMENTATION_SLOT, _newImpl);
+    (bool success, ) = _newImpl.delegatecall(data);
+    require(success);
   }
 }
