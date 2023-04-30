@@ -9,7 +9,7 @@ contract Clock {
 
   function initialize(uint256 _alarm1) external {
     require(!initialized, "Already initialized");
-    alarm1 = _alarm1; 
+    alarm1 = _alarm1;
     initialized = true;
   }
 
@@ -26,4 +26,3 @@ contract Clock {
   }
 
 }
-
