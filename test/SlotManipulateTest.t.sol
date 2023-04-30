@@ -21,8 +21,8 @@ contract SlotManipulateTest is Test {
 
   function testValueSet() public {
     // TODO: set bytes32(keccak256("appwork.week8"))
-
-    // Assert that the value is set 
+    instance.setAppworksWeek8(2023_4_27);
+    // Assert that the value is set
     assertEq(
       uint256(vm.load(address(instance), keccak256("appworks.week8"))),
       2023_4_27
@@ -31,22 +31,61 @@ contract SlotManipulateTest is Test {
 
   function testSetProxyImplementation() public {
     // TODO: set Proxy Implementation address
-    // Assert that the value is set 
+    instance.setProxyImplementation(randomAddress);
+    // Assert that the value is set
+    assertEq(
+      bytes32ToAddress(
+        vm.load(
+          address(instance),
+          bytes32(uint256(keccak256("eip1967.proxy.implementation")) - 1)
+        )
+      ),
+      randomAddress
+    );
   }
 
   function testSetBeaconImplementation() public {
     // TODO: set Beacon Implementation address
-    // Assert that the value is set 
+    instance.setBeaconImplementation(randomAddress);
+    // Assert that the value is set
+    assertEq(
+      bytes32ToAddress(
+        vm.load(
+          address(instance),
+          bytes32(uint256(keccak256("eip1967.proxy.beacon")) - 1)
+        )
+      ),
+      randomAddress
+    );
   }
 
   function testSetAdminImplementation() public {
     // TODO: set admin address
-    // Assert that the value is set 
+    instance.setAdminImplementation(randomAddress);
+    // Assert that the value is set
+    assertEq(
+      bytes32ToAddress(
+        vm.load(
+          address(instance),
+          bytes32(uint256(keccak256("eip1967.proxy.admin")) - 1)
+        )
+      ),
+      randomAddress
+    );
   }
 
   function testSetProxiableImplementation() public {
     // TODO: set Proxiable address
-    // Assert that the value is set 
+    instance.setProxiable(randomAddress);
+    // Assert that the value is set
+    assertEq(
+      bytes32ToAddress(
+        vm.load(
+          address(instance),
+          keccak256("PROXIABLE")
+        )
+      ),
+      randomAddress
+    );
   }
-
 }
