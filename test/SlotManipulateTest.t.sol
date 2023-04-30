@@ -12,7 +12,7 @@ contract SlotManipulateTest is Test {
 
   function setUp() public {
     instance = new SlotManipulate();
-    randomAddress = makeAddr("jack");
+    randomAddress = makeAddr("me");
   }
 
   function bytes32ToAddress(bytes32 _bytes32) internal pure returns (address) {
