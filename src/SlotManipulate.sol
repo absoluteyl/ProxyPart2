@@ -27,13 +27,13 @@ contract SlotManipulate is Slots {
 
   // 在 keccak256(“appworks.week8”) 這個 slot 中存入 2023_4_27
   function setAppworksWeek8(uint256 amount) external {
-    // TODO: set AppworksWeek8
+    // set AppworksWeek8
     _setSlotToUint256(keccak256("appworks.week8"), amount);
   }
 
   // 在 bytes32(uint256(keccak256('eip1967.proxy.implementation')) - 1) 中存入隨意地址
   function setProxyImplementation(address _implementation) external {
-    // TODO: set Proxy Implenmentation address
+    // set Proxy Implenmentation address
     _setSlotToAddress(
       bytes32(uint256(keccak256('eip1967.proxy.implementation')) - 1),
       _implementation
@@ -42,7 +42,7 @@ contract SlotManipulate is Slots {
 
   // 在 bytes32(uint256(keccak256('eip1967.proxy.beacon')) - 1) 中存入隨意地址
   function setBeaconImplementation(address _implementation) external {
-    // TODO: set Beacon Implenmentation address
+    // set Beacon Implenmentation address
     _setSlotToAddress(
       bytes32(uint256(keccak256('eip1967.proxy.beacon')) - 1),
       _implementation
@@ -51,7 +51,7 @@ contract SlotManipulate is Slots {
 
   // 在 bytes32(uint256(keccak256('eip1967.proxy.admin')) - 1) 中存入隨意地址
   function setAdminImplementation(address _who) external {
-    // TODO: set Admin Implenmentation address
+    // set Admin Implenmentation address
     _setSlotToAddress(
       bytes32(uint256(keccak256('eip1967.proxy.admin')) - 1),
       _who
@@ -60,7 +60,7 @@ contract SlotManipulate is Slots {
 
   // 在 keccak256("PROXIABLE") 中存入隨意地址 - UUPS convention
   function setProxiable(address _implementation) external {
-    // TODO: set Proxiable Implenmentation address
+    // set Proxiable Implenmentation address
     _setSlotToAddress(
       keccak256("PROXIABLE"), _implementation
     );
