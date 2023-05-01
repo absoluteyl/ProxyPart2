@@ -7,41 +7,83 @@ import { Clock } from "../src/Logic/Clock.sol";
 import { ClockV2 } from "../src/Logic/ClockV2.sol";
 
 contract TransparentTest is Test {
-  
-  Clock public clock;
-  ClockV2 public clockV2;
-  Transparent public transparentProxy;
-  uint256 public alarm1Time;
 
-  address admin;
-  address user1;
+  Transparent public transparentProxy;
+  Clock       public clock;
+  Clock       public clockProxy;
+  ClockV2     public clockV2;
+  ClockV2     public clockV2Proxy;
+
+  address admin = makeAddr("admin");
+  address user1 = makeAddr("user1");
 
   function setUp() public {
-    admin = makeAddr("admin");
-    user1 = makeAddr("noobUser");
     clock = new Clock();
     clockV2 = new ClockV2();
     vm.prank(admin);
     transparentProxy = new Transparent(address(clock));
+    clockProxy = Clock(address(transparentProxy));
   }
 
-  function testProxyWorks(uint256 _alarm1) public {
-    // check Clock functionality is successfully proxied
+  modifier initClockProxy(uint256 _alarm1) {
+    clockProxy.initialize(_alarm1);
+    _;
+  }
+  // check Clock functionality is successfully proxied
+  function testProxyWorks(uint256 _alarm1) public initClockProxy(_alarm1) {
+    assertEq(clockProxy.getTimestamp(), block.timestamp);
   }
 
-  function testUpgradeToOnlyAdmin(uint256 _alarm1, uint256 _alarm2) public {
-    // check upgradeTo could be called only by admin
+  // check upgradeTo could be called only by admin
+  function testUpgradeToOnlyAdmin(uint256 _alarm1, uint256 _alarm2) public
+    initClockProxy(_alarm1)
+  {
+    vm.expectRevert("only admin");
+    transparentProxy.upgradeTo(address(clockV2));
+
+    vm.prank(admin);
+    transparentProxy.upgradeTo(address(clockV2));
+    clockV2Proxy = ClockV2(address(transparentProxy));
+    clockV2Proxy.setAlarm2(_alarm2);
+    assertEq(clockV2Proxy.getTimestamp(), block.timestamp);
+    assertEq(clockV2Proxy.alarm2(), _alarm2);
   }
 
-  function testUpgradeToAndCallOnlyAdmin(uint256 _alarm1, uint256 _alarm2) public {
-    // check upgradeToAndCall could be called only by admin
+  // check upgradeToAndCall could be called only by admin
+  function testUpgradeToAndCallOnlyAdmin(uint256 _alarm1, uint256 _alarm2) public
+    initClockProxy(_alarm1)
+  {
+    vm.expectRevert("only admin");
+    transparentProxy.upgradeToAndCall(
+      address(clockV2),
+      abi.encodeWithSignature("setAlarm2(uint256)", _alarm2)
+    );
+
+    vm.prank(admin);
+    transparentProxy.upgradeToAndCall(
+      address(clockV2),
+      abi.encodeWithSignature("setAlarm2(uint256)", _alarm2)
+    );
+    clockV2Proxy = ClockV2(address(transparentProxy));
+    clockV2Proxy.setAlarm2(_alarm2);
+    assertEq(clockV2Proxy.getTimestamp(), block.timestamp);
+    assertEq(clockV2Proxy.alarm2(), _alarm2);
   }
 
-  function testFallbackShouldRevertIfSenderIsAdmin(uint256 _alarm1) public {
-    // check admin shouldn't trigger fallback
+  // check admin shouldn't trigger fallback
+  function testFallbackShouldRevertIfSenderIsAdmin(uint256 _alarm1) public
+    initClockProxy(_alarm1)
+  {
+    vm.prank(admin);
+    vm.expectRevert("not an admin function");
+    clockProxy.setAlarm1(_alarm1);
   }
 
-  function testFallbackShouldSuccessIfSenderIsntAdmin(uint256 _alarm1) public {
-    // check admin shouldn't trigger fallback
+  // check admin shouldn't trigger fallback
+  function testFallbackShouldSuccessIfSenderIsntAdmin(uint256 _alarm1) public
+    initClockProxy(_alarm1)
+  {
+    clockProxy.setAlarm1(_alarm1);
+    assertEq(clockProxy.alarm1(), _alarm1);
   }
 }
