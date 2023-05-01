@@ -5,25 +5,29 @@ import { Slots } from "./SlotManipulate.sol";
 import { BasicProxy } from "./BasicProxy.sol";
 
 contract Transparent is Slots, BasicProxy {
+  bytes32 constant ADMIN_SLOT = bytes32(uint256(keccak256('eip1967.proxy.admin')) - 1);
 
   constructor(address _implementation) BasicProxy(_implementation) {
-    // TODO: set admin address to Admin slot
+    // set admin address to Admin slot
+    _setSlotToAddress(ADMIN_SLOT, msg.sender);
+    _setSlotToAddress(IMPLEMENTATION_SLOT, _implementation);
   }
 
   modifier onlyAdmin {
-    // TODO: finish onlyAdmin modifier
+    require(msg.sender == _getSlotToAddress(ADMIN_SLOT), "only admin");
     _;
   }
 
   function upgradeTo(address _newImpl) public override onlyAdmin {
-    // TODO: rewriet upgradeTo
+    super.upgradeTo(_newImpl);
   }
 
   function upgradeToAndCall(address _newImpl, bytes memory data) public override onlyAdmin {
-    // TODO: rewriet upgradeToAndCall
+    super.upgradeToAndCall(_newImpl, data);
   }
 
-  fallback() external payable override {
-    // rewrite fallback
+  fallback() external payable override{
+    require(msg.sender != _getSlotToAddress(ADMIN_SLOT), "not an admin function");
+    _delegate(_getSlotToAddress(IMPLEMENTATION_SLOT));
   }
 }
